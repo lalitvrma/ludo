@@ -40,7 +40,7 @@ class LudoBoard extends StatelessWidget {
         final isSelectable = isMyTurn &&
             playerId == currentUserId &&
             turnState == 'moving' &&
-            GameService().isValidMove(playerTokens, position, diceResult);
+            GameService().isValidMove(colorName, position, diceResult);
 
         final offset = GamePath.getOffsetForPosition(colorName, position, boardSize, i);
         tokens.add(
