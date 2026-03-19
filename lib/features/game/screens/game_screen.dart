@@ -102,23 +102,8 @@ class _GameScreenState extends State<GameScreen> {
     }
 
     if (turnState == 'moving') {
-       final playerData = players[currentPlayerId];
-      final playerTokens = playerData['tokens'] as List<dynamic>;
-      final playerColor = playerData['color'] as String;
-
-      // Check for valid moves to provide a more informative message.
-      bool hasValidMove = false;
-      for (final tokenPos in playerTokens) {
-        if (_gameService.isValidMove(playerColor, tokenPos as int, diceResult)) {
-          hasValidMove = true;
-          break;
-        }
-      }
-
       if (isMyTurn) {
-        return hasValidMove
-            ? 'You rolled a $diceResult. Choose a token to move.'
-            : 'You rolled a $diceResult, but have no valid moves. Passing turn...';
+        return 'You rolled a $diceResult. Choose a token to move.';
       } else {
         return '$currentPlayerName rolled a $diceResult.';
       }

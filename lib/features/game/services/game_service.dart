@@ -157,11 +157,11 @@ class GameService {
 
     final newPosition = getNewPosition(playerColor, currentPosition, diceResult);
 
-    // If the new position is the same as the old one, the move is invalid (e.g., blocked).
-    if (newPosition == currentPosition && currentPosition != -1) {
+    // If the new position is the same as the old one, the move is invalid (e.g., blocked or overshot).
+    if (newPosition == currentPosition) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -174,39 +174,29 @@ class GameService {
       return diceResult == 6 ? _playerPathData[playerColor]!['start']! : currentPosition;
     }
 
-    // Determine the player's specific path start and entry points.
+    if (currentPosition >= 52) {
+      // Token is already in the home run.
+      int newHomePos = currentPosition + diceResult;
+      return newHomePos > 57 ? currentPosition : newHomePos;
+    }
+
     int playerStart = _playerPathData[playerColor]!['start']!;
     int homeEntry = _playerPathData[playerColor]!['entry']!;
-    int stepsTaken;
 
-    // Calculate the number of steps the token has already taken on the 52-step main path.
-    if (currentPosition > homeEntry) { 
-      stepsTaken = currentPosition - playerStart;
-    } else {
-      stepsTaken = (52 - playerStart) + currentPosition;
-    }
-
-    int newStepsTaken = stepsTaken + diceResult;
-
-    // If the token is on the home run.
-    if (currentPosition >= 52) {
-      final homeRunProgress = currentPosition - 52;
-      if (homeRunProgress + diceResult > 5) {
-        return currentPosition; // Overshot the end
+    int tempPos = currentPosition;
+    for (int i = 0; i < diceResult; i++) {
+      if (tempPos == homeEntry) {
+        // Enters the home path.
+        int homeRunSteps = diceResult - i;
+        if (homeRunSteps > 6) return currentPosition; // Overshot.
+        return 51 + homeRunSteps;
       }
-      return 52 + homeRunProgress + diceResult;
-    }
-
-    // Check if the token enters the home run.
-    if (newStepsTaken > (homeEntry < playerStart ? 52 - playerStart + homeEntry : homeEntry - playerStart)) {
-      final homeRunProgress = newStepsTaken - (homeEntry < playerStart ? 52 - playerStart + homeEntry : homeEntry - playerStart) - 1;
-      if (homeRunProgress > 5) {
-        return currentPosition; // Overshot
+      tempPos++;
+      if (tempPos > 52) {
+        tempPos = 1;
       }
-      return 52 + homeRunProgress;
     }
-
-    return (currentPosition + diceResult -1) % 52 + 1; // Normal move on the main path
+    return tempPos;
   }
 
   /// Returns a stream of game state updates from Firebase.
